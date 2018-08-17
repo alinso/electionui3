@@ -6,13 +6,6 @@ import React from "react";
 const axios = require('axios');
 let theObject;
 
-const politicalInclination=[
-    'RADICAL REPUBLICAN',
-    'MIDDLE REPUBLICAN',
-    'MIDDLE',
-    'MIDDLE DEMOCRAT',
-    'RADICAL DEMOCRAT'
-];
 
 
 class CityTable extends Component {
@@ -25,7 +18,7 @@ class CityTable extends Component {
 
 
     validateNewRow(row){
-        if(row.cityName!=="")
+        if(row.cityName!=="" && row.politicalInclination!=="")
             return true;
 
         return false;
@@ -33,16 +26,16 @@ class CityTable extends Component {
 
 
     handleSubmit(event) {
+        const city={};
+        city.cityName  =event.cityName;
+        city.politicalInclination =  theObject.props.politicalInclination.indexOf(event.politicalInclination);
 
-        const party={};
-        party.partyName  =event.partyName;
 
         if(!theObject.validateNewRow(event))
             return;
 
-
         axios.post("http://localhost:8080/city/create",
-            JSON.stringify( party),
+            JSON.stringify( city),
             {
                 headers: {
                     'Content-Length': 0,
@@ -56,8 +49,6 @@ class CityTable extends Component {
             })
     }
 
-
-
     render() {
         const options = {
             onAddRow:this.handleSubmit
@@ -65,14 +56,15 @@ class CityTable extends Component {
         const selectRow = {
             mode: 'checkbox'
         };
-
         function onAfterSaveCell(row, cellName, cellValue) {
 
             if(cellValue==="")
                 return;
 
+            let data  ={...row}
+            data.politicalInclination  = theObject.props.politicalInclination.indexOf(row.politicalInclination);
             axios.post("http://localhost:8080/city/update/",
-                JSON.stringify(row),
+                JSON.stringify(data),
                 {
                     headers: {
                         'Content-Length': 0,
@@ -93,7 +85,8 @@ class CityTable extends Component {
                              deleteRow={true} pagination cellEdit={cellEditProp}>
                 <TableHeaderColumn hiddenOnInsert  isKey={true} dataField='id'> City ID </TableHeaderColumn>
                 <TableHeaderColumn dataField='cityName'> City Name </TableHeaderColumn>
-                <TableHeaderColumn dataField='politicalInclination'  editable={ { type: 'select', options: { values: politicalInclination } } }> Political Inclination </TableHeaderColumn>
+                <TableHeaderColumn dataField='politicalInclination'
+                                   editable={ { type: 'select', options: { values: this.props.politicalInclination } } }> Political Inclination </TableHeaderColumn>
             </BootstrapTable>
         )
     }

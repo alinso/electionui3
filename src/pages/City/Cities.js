@@ -6,6 +6,14 @@ import CityTable from "../City/CityTable";
 const axios = require('axios');
 let theObject;
 
+const politicalInclination=[
+    'RADICAL REPUBLICAN',
+    'MIDDLE REPUBLICAN',
+    'MIDDLE',
+    'MIDDLE DEMOCRAT',
+    'RADICAL DEMOCRAT'
+];
+
 class Cities extends Component {
     constructor(props) {
         super(props);
@@ -21,16 +29,26 @@ class Cities extends Component {
 
     refreshTable() {
         axios.get("http://localhost:8080/city/all").then(res => {
-            this.setState({cities: res.data});
+
+            let cities  =[];
+            res.data.forEach(function (val) {
+               val.politicalInclination  = politicalInclination[val.politicalInclination];
+               cities.push(val);
+            });
+
+            this.setState({cities: cities});
         });
     }
 
+    componentDidMount(){
+        this.refreshTable();
+}
 
     render() {
         return (
             <div className={"main col-md-8 offset-md-2"}>
-                <CityTable refresh={this.refreshTable} onAfterDeleteRow={this.handleDelete}
-                            parties={this.state.cities}/>
+                <CityTable politicalInclination={politicalInclination} refresh={this.refreshTable} onAfterDeleteRow={this.handleDelete}
+                            cities={this.state.cities}/>
             </div>
 
 
